@@ -94,58 +94,174 @@ export function PhotocardEditor() {
     setTextLayers(prev => prev.map(layer => (layer.id === id ? { ...layer, ...updates } : layer)));
   };
 
-  const handleExport = async () => {
-    const blob = await exportCanvas(selectedImage, textLayers, startDate, timeHeader);
-    if (!blob) return;
+  const openImageForManualSave = (blob: Blob) => {
+  const reader = new FileReader();
 
-    if (isFacebookBrowser()) {
-      // Convert blob to base64 data URL for better compatibility with Facebook's in-app browser
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setGeneratedImageBlob(reader.result as string);
-        setSaveDialogOpen(true);
-      };
-      reader.readAsDataURL(blob);
-    } else {
-      // Normal browser: Direct download
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `justice-for-hadi-photocard-${Date.now()}.png`;
-      a.click();
-      URL.revokeObjectURL(url);
-    }
+  reader.onloadend = () => {
+    const dataUrl = reader.result as string;
+
+    const win = window.open('', '_blank');
+    if (!win) return;
+
+    win.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Save Photocard</title>
+          <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        </head>
+        <body style="
+          margin:0;
+          background:#000;
+          display:flex;
+          flex-direction:column;
+          justify-content:center;
+          align-items:center;
+          height:100vh;
+        ">
+          <img src="${dataUrl}"
+            style="max-width:100%;height:auto;user-select:none;" />
+
+          <p style="
+            color:#fff;
+            margin-top:12px;
+            font-size:14px;
+            text-align:center;
+          ">
+            ছবির উপর লং প্রেস করুন → Save Image
+          </p>
+        </body>
+      </html>
+    `);
+
+    win.document.close();
   };
+
+  reader.readAsDataURL(blob);
+};
+
+const isFacebookInAppBrowser = () => {
+  const ua = navigator.userAgent || '';
+  return /FBAN|FBAV|Instagram/i.test(ua);
+};
+
+
+
+  // const handleExport = async () => {
+  //   const blob = await exportCanvas(selectedImage, textLayers, startDate, timeHeader);
+  //   if (!blob) return;
+
+  //   if (isFacebookBrowser()) {
+  //     // Convert blob to base64 data URL for better compatibility with Facebook's in-app browser
+  //     const reader = new FileReader();
+  //     reader.onloadend = () => {
+  //       setGeneratedImageBlob(reader.result as string);
+  //       setSaveDialogOpen(true);
+  //     };
+  //     reader.readAsDataURL(blob);
+  //   } else {
+  //     // Normal browser: Direct download
+  //     const url = URL.createObjectURL(blob);
+  //     const a = document.createElement('a');
+  //     a.href = url;
+  //     a.download = `justice-for-hadi-photocard-${Date.now()}.png`;
+  //     a.click();
+  //     URL.revokeObjectURL(url);
+  //   }
+  // };
+
+  const handleExport = async () => {
+  const blob = await exportCanvas(
+    selectedImage,
+    textLayers,
+    startDate,
+    timeHeader
+  );
+  if (!blob) return;
+
+  if (isFacebookInAppBrowser()) {
+    openImageForManualSave(blob);
+    return;
+  }
+
+  // Normal browsers
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `justice-for-hadi-photocard-${Date.now()}.png`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+};
+
+  // const handleShare = async () => {
+  //   const blob = await exportCanvas(selectedImage, textLayers, startDate, timeHeader);
+  //   if (!blob) return;
+
+  //   const file = new File([blob], 'justice-for-hadi-photocard.png', { type: 'image/png' });
+
+  //   if (navigator.share && navigator.canShare({ files: [file] })) {
+  //     try {
+  //       await navigator.share({
+  //         files: [file],
+  //         title: 'Justice For Hadi Photocard',
+  //         text: timeHeader,
+  //       });
+  //       setShowShareMenu(false);
+  //     } catch (err) {
+  //       console.log('Share cancelled');
+  //     }
+  //   } else if (isFacebookBrowser()) {
+  //     // Fallback for Facebook in-app browser
+  //     const reader = new FileReader();
+  //     reader.onloadend = () => {
+  //       setGeneratedImageBlob(reader.result as string);
+  //       setSaveDialogOpen(true);
+  //     };
+  //     reader.readAsDataURL(blob);
+  //   } else {
+  //     setShowShareMenu(true);
+  //   }
+  // };
 
   const handleShare = async () => {
-    const blob = await exportCanvas(selectedImage, textLayers, startDate, timeHeader);
-    if (!blob) return;
+  const blob = await exportCanvas(
+    selectedImage,
+    textLayers,
+    startDate,
+    timeHeader
+  );
+  if (!blob) return;
 
-    const file = new File([blob], 'justice-for-hadi-photocard.png', { type: 'image/png' });
+  const file = new File([blob], 'justice-for-hadi-photocard.png', {
+    type: 'image/png',
+  });
 
-    if (navigator.share && navigator.canShare({ files: [file] })) {
-      try {
-        await navigator.share({
-          files: [file],
-          title: 'Justice For Hadi Photocard',
-          text: timeHeader,
-        });
-        setShowShareMenu(false);
-      } catch (err) {
-        console.log('Share cancelled');
-      }
-    } else if (isFacebookBrowser()) {
-      // Fallback for Facebook in-app browser
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setGeneratedImageBlob(reader.result as string);
-        setSaveDialogOpen(true);
-      };
-      reader.readAsDataURL(blob);
-    } else {
-      setShowShareMenu(true);
+  // Native share (Chrome, Safari, etc.)
+  if (navigator.share && navigator.canShare?.({ files: [file] })) {
+    try {
+      await navigator.share({
+        files: [file],
+        title: 'Justice For Hadi Photocard',
+        text: timeHeader,
+      });
+      setShowShareMenu(false);
+      return;
+    } catch {
+      // fall through
     }
-  };
+  }
+
+  // Facebook in-app browser fallback
+  if (isFacebookInAppBrowser()) {
+    openImageForManualSave(blob);
+    return;
+  }
+
+  // Last fallback (custom share menu)
+  setShowShareMenu(true);
+};
 
   const handleFacebookShare = async () => {
     const blob = await exportCanvas(selectedImage, textLayers, startDate, timeHeader);
