@@ -227,33 +227,36 @@ export function PhotocardCanvas({
         )}
 
         {imageLoaded &&
-          textLayers.map(layer => (
-            <div
-              key={layer.id}
-              onMouseDown={e => handleMouseDown(e, layer.id)}
-              onTouchStart={e => handleTouchStart(e, layer.id)}
-              className={`absolute cursor-move select-none transition-all ${selectedLayerId === layer.id ? 'ring-2 ring-primary ring-offset-2' : ''
-                } ${dragging?.id === layer.id ? 'opacity-70' : ''}`}
-              style={{
-                left: layer.x * scale,
-                top: layer.y * scale,
-                transform: 'translate(-50%, -50%)',
-                fontSize: layer.fontSize * scale,
-                fontFamily: layer.fontFamily,
-                color: layer.color,
-                opacity: dragging?.id === layer.id ? 0.7 : layer.opacity / 100,
-                textAlign: layer.textAlign,
-                textShadow: `${layer.textShadow * scale}px ${layer.textShadow * scale}px ${layer.textShadow * 2 * scale}px rgba(0,0,0,0.5)`,
-                fontWeight: 700,
-                whiteSpace: 'pre-wrap',
-                maxWidth: '80%',
-                padding: '8px',
-                touchAction: 'none',
-              }}
-            >
-              {layer.text}
-            </div>
-          ))}
+          textLayers.map(layer => {
+            if (!layer.text) return null;
+            return (
+              <div
+                key={layer.id}
+                onMouseDown={e => handleMouseDown(e, layer.id)}
+                onTouchStart={e => handleTouchStart(e, layer.id)}
+                className={`absolute cursor-move select-none transition-all ${selectedLayerId === layer.id ? 'ring-2 ring-primary ring-offset-2' : ''
+                  } ${dragging?.id === layer.id ? 'opacity-70' : ''}`}
+                style={{
+                  left: layer.x * scale,
+                  top: layer.y * scale,
+                  transform: 'translate(-50%, -50%)',
+                  fontSize: layer.fontSize * scale,
+                  fontFamily: layer.fontFamily,
+                  color: layer.color,
+                  opacity: dragging?.id === layer.id ? 0.7 : layer.opacity / 100,
+                  textAlign: layer.textAlign,
+                  textShadow: `${layer.textShadow * scale}px ${layer.textShadow * scale}px ${layer.textShadow * 2 * scale}px rgba(0,0,0,0.5)`,
+                  fontWeight: 700,
+                  whiteSpace: 'pre-wrap',
+                  maxWidth: '80%',
+                  padding: '8px',
+                  touchAction: 'none',
+                }}
+              >
+                {layer.text}
+              </div>
+            );
+          })}
 
         <canvas id="export-canvas" width={CANVAS_SIZE} height={CANVAS_SIZE} className="hidden" />
       </div>
