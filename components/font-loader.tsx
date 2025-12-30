@@ -29,6 +29,14 @@ export function FontLoader() {
         font-display: swap;
       }
 
+      @font-face {
+        font-family: 'abu sayed';
+        src: url('${getAssetPath('/fonts/abu sayed.ttf')}') format('truetype');
+        font-weight: normal;
+        font-style: normal;
+        font-display: swap;
+      }
+
     `}</style>
   );
 }
