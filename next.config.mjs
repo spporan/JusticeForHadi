@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const isGithubActions = process.env.GITHUB_ACTIONS === 'true';
-const repoName = 'photocard-generator-app'; // Replace with your repo name
+const repoName = 'JusticeForHadi'; // Replace with your repo name
 
 const nextConfig = {
   output: 'export',

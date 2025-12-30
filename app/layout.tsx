@@ -7,31 +7,17 @@ import './fonts.css';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Photocard Studio - Create Beautiful Quote Cards',
+  title: 'Justice For Hadi',
   description:
-    'Create stunning photocards with custom quotes. Drag, resize, and style text on beautiful images. Export as high-quality PNG or share directly to social media.',
+    'Create and share powerful photocards to keep Hadi’s call for justice alive.',
   keywords: ['photocard', 'quote maker', 'image editor', 'social media', 'quotes', 'design tool'],
-  authors: [{ name: 'Photocard Studio' }],
+  authors: [{ name: 'Shah Poran' }],
   icons: {
-    icon: [
-      {
-        url: '/icon-light-32x32.png',
-        media: '(prefers-color-scheme: light)',
-      },
-      {
-        url: '/icon-dark-32x32.png',
-        media: '(prefers-color-scheme: dark)',
-      },
-      {
-        url: '/icon.svg',
-        type: 'image/svg+xml',
-      },
-    ],
-    apple: '/apple-icon.png',
+    icon: '/icon-32x32.png',
   },
   openGraph: {
-    title: 'Photocard Studio',
-    description: 'Create stunning photocards with custom quotes',
+    title: 'Justice For Hadi',
+    description: 'Create and share powerful photocards to keep Hadi’s call for justice alive.',
     type: 'website',
   },
 };
