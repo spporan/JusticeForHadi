@@ -1,8 +1,9 @@
 import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import { Analytics } from '@vercel/analytics/next';
+import { FontLoader } from '@/components/font-loader';
+import { ThemeProvider } from '@/components/theme-provider';
 import './globals.css';
-import './fonts.css';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -39,10 +40,18 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className={inter.className}>
-      <body className="min-h-screen bg-background">
-        {children}
-        <Analytics />
+    <html lang="en">
+      <body className={inter.className}>
+        <FontLoader />
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          {children}
+          <Analytics />
+        </ThemeProvider>
       </body>
     </html>
   )

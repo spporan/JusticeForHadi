@@ -29,6 +29,7 @@ import {
 } from 'lucide-react';
 import { PhotocardCanvas, exportCanvas } from '@/components/photocard-canvas';
 import { PRESET_IMAGES, PRESET_QUOTES, FONT_FAMILIES } from '@/lib/constants';
+import { getAssetPath } from '@/lib/utils';
 import type { TextLayer } from '@/lib/types';
 
 export function PhotocardEditor() {
@@ -498,7 +499,7 @@ function ControlPanel({
                     }`}
                 >
                   <img
-                    src={preset.url || '/placeholder.svg'}
+                    src={preset.url || getAssetPath('/placeholder.svg')}
                     alt={preset.name}
                     className="w-full h-full object-cover"
                   />

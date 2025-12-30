@@ -18,6 +18,9 @@ const nextConfig = {
       },
     ],
   },
+  env: {
+    NEXT_PUBLIC_BASE_PATH: isGithubActions ? `/${repoName}` : '',
+  },
 };
 
 export default nextConfig;

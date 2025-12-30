@@ -6,6 +6,11 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+export function getAssetPath(path: string) {
+  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+  return `${basePath}${path.startsWith('/') ? path : `/${path}`}`;
+}
+
 export function calculateElapsedTime(startDate: Date): TimeElapsed {
   const now = new Date();
   const diffMs = now.getTime() - startDate.getTime();
