@@ -110,7 +110,7 @@ export function PhotocardCanvas({
       ctx.fillRect(0, IMAGE_HEIGHT, CANVAS_SIZE, TIME_HEIGHT);
 
       ctx.save();
-      ctx.font = '600 48px abu sayed';
+      ctx.font = '600 48px Lima Bosonto';
       ctx.fillStyle = '#000000';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
@@ -119,7 +119,7 @@ export function PhotocardCanvas({
       ctx.restore();
 
       ctx.save();
-      ctx.font = 'bold 80px abu sayed';
+      ctx.font = 'bold 80px Lima Bosonto';
       ctx.fillStyle = '#ff0000';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
@@ -133,7 +133,7 @@ export function PhotocardCanvas({
 
       // Add #JusticeForHadi text
       ctx.save();
-      ctx.font = 'bold 60px abu sayed';
+      ctx.font = 'bold 60px Lima Bosonto';
       ctx.fillStyle = '#ff0000'; // Red color for visibility
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
@@ -152,9 +152,9 @@ export function PhotocardCanvas({
     const loadFonts = async () => {
       try {
         // Explicitly load the custom font to ensure it's available for canvas
-        await document.fonts.load('600 48px "abu sayed"');
-        await document.fonts.load('bold 80px "abu sayed"');
-        await document.fonts.load('bold 60px "abu sayed"');
+        await document.fonts.load('600 48px "Lima Bosonto"');
+        await document.fonts.load('bold 80px "Lima Bosonto"');
+        await document.fonts.load('bold 60px "Lima Bosonto"');
         console.log('Fonts loaded explicitly');
       } catch (err) {
         console.error('Error loading fonts:', err);
@@ -378,7 +378,7 @@ export function exportCanvas(
       ctx.fillRect(0, IMAGE_HEIGHT, CANVAS_SIZE, TIME_HEIGHT);
 
       ctx.save();
-      ctx.font = '600 48px abu sayed';
+      ctx.font = '600 48px Lima Bosonto';
       ctx.fillStyle = '#000000';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
@@ -388,7 +388,7 @@ export function exportCanvas(
       // Draw elapsed time
       const elapsed = calculateElapsedTime(startDate);
       ctx.save();
-      ctx.font = 'bold 80px abu sayed';
+      ctx.font = 'bold 80px Lima Bosonto';
       ctx.fillStyle = '#ff0000';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
@@ -402,7 +402,7 @@ export function exportCanvas(
 
       // Add #JusticeForHadi text
       ctx.save();
-      ctx.font = 'bold 60px abu sayed';
+      ctx.font = 'bold 60px Lima Bosonto';
       ctx.fillStyle = '#ff0000'; // Red color for visibility
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';

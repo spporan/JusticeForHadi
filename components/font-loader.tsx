@@ -37,6 +37,14 @@ export function FontLoader() {
         font-display: swap;
       }
 
+      @font-face {
+        font-family: 'Lima Bosonto';
+        src: url('${getAssetPath('/fonts/Lima Bosonto.ttf')}') format('truetype');
+        font-weight: normal;
+        font-style: normal;
+        font-display: swap;
+      }
+
     `}</style>
   );
 }
