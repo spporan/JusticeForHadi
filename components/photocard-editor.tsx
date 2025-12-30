@@ -459,6 +459,8 @@ function ControlPanel({
   showShareMenu,
   setShowShareMenu,
 }: ControlPanelProps) {
+  const [visiblePresets, setVisiblePresets] = useState(8);
+
   return (
     <div className="p-4 lg:p-6 space-y-6">
       {/* Header */}
@@ -560,7 +562,7 @@ function ControlPanel({
           <div>
             <Label>Preset Images</Label>
             <div className="grid grid-cols-2 gap-2 mt-2">
-              {PRESET_IMAGES.map(preset => (
+              {PRESET_IMAGES.slice(0, visiblePresets).map(preset => (
                 <button
                   key={preset.id}
                   onClick={() => setSelectedImage(preset.url)}
@@ -570,11 +572,23 @@ function ControlPanel({
                   <img
                     src={preset.url || getAssetPath('/placeholder.svg')}
                     alt={preset.name}
+                    loading="lazy"
+                    decoding="async"
                     className="w-full h-full object-cover"
                   />
                 </button>
               ))}
             </div>
+            {visiblePresets < PRESET_IMAGES.length && (
+              <Button
+                onClick={() => setVisiblePresets(prev => Math.min(prev + 8, PRESET_IMAGES.length))}
+                variant="outline"
+                className="w-full mt-4"
+                size="sm"
+              >
+                Load More Images
+              </Button>
+            )}
           </div>
         </TabsContent>
 

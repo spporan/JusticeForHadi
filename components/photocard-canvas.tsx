@@ -4,6 +4,7 @@ import type React from 'react';
 import { useRef, useEffect, useState } from 'react';
 import type { TextLayer } from '@/lib/types';
 import { calculateElapsedTime } from '@/lib/utils';
+import { Loader2 } from 'lucide-react';
 
 interface PhotocardCanvasProps {
   image: string;
@@ -73,6 +74,8 @@ export function PhotocardCanvas({
     const canvas = canvasRef.current;
     if (!canvas) return;
 
+    setImageLoaded(false);
+
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
@@ -131,7 +134,7 @@ export function PhotocardCanvas({
       ctx.fillStyle = '#ff0000'; // Red color for visibility
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText('#JusticeForHadi', CANVAS_SIZE / 2, IMAGE_HEIGHT + 310);
+      ctx.fillText('#JusticeForHadi', CANVAS_SIZE / 2, IMAGE_HEIGHT + 300);
       ctx.restore();
 
       setImageLoaded(true);
@@ -214,6 +217,13 @@ export function PhotocardCanvas({
           height={CANVAS_SIZE}
           className="absolute inset-0 w-full h-full"
         />
+
+        {!imageLoaded && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-muted/10 backdrop-blur-[2px] z-50 animate-in fade-in duration-200">
+            <Loader2 className="w-10 h-10 animate-spin text-primary" />
+            <p className="mt-2 text-sm font-medium text-muted-foreground">Generating Canvas...</p>
+          </div>
+        )}
 
         {imageLoaded &&
           textLayers.map(layer => (
@@ -365,7 +375,7 @@ export function exportCanvas(
       ctx.fillStyle = '#ff0000'; // Red color for visibility
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText('#JusticeForHadi', CANVAS_SIZE / 2, IMAGE_HEIGHT + 310);
+      ctx.fillText('#JusticeForHadi', CANVAS_SIZE / 2, IMAGE_HEIGHT + 300);
       ctx.restore();
 
       canvas.toBlob(blob => resolve(blob), 'image/png', 1.0);
