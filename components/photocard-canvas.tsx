@@ -123,8 +123,9 @@ export function PhotocardCanvas({
       ctx.textBaseline = 'middle';
 
       const timeText = `${toBanglaDigit(elapsedTime.days)} দিন ` +
-        `${toBanglaDigit(elapsedTime.hours).toString().padStart(2, '0')} ঘণ্টা ` +
-        `${toBanglaDigit(elapsedTime.minutes).toString().padStart(2, '0')} মিনিট`;
+        `${toBanglaDigit(elapsedTime.hours).toString().padStart(2, '০')} ঘণ্টা ` +
+        `${toBanglaDigit(elapsedTime.minutes).toString().padStart(2, '০')} মিনিট`;
+
 
       ctx.fillText(timeText, CANVAS_SIZE / 2, IMAGE_HEIGHT + 200);
 
@@ -263,10 +264,12 @@ export function PhotocardCanvas({
 
 export function toBanglaDigit(number: number) {
   const banglaDigits = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
-  return String(number)
+  const banglaNumber = String(number)
     .split('')
     .map(d => (d >= '0' && d <= '9' ? banglaDigits[Number(d)] : d))
     .join('');
+
+  return banglaNumber;
 }
 export function exportCanvas(
   image: string,
@@ -364,8 +367,9 @@ export function exportCanvas(
       ctx.textBaseline = 'middle';
 
       const timeText = `${toBanglaDigit(elapsed.days)} দিন ` +
-        `${toBanglaDigit(elapsed.hours).toString().padStart(2, '0')} ঘণ্টা ` +
-        `${toBanglaDigit(elapsed.minutes).toString().padStart(2, '0')} মিনিট`;
+        `${toBanglaDigit(elapsed.hours).toString().padStart(2, '০')} ঘণ্টা ` +
+        `${toBanglaDigit(elapsed.minutes).toString().padStart(2, '০')} মিনিট`;
+
       ctx.fillText(timeText, CANVAS_SIZE / 2, IMAGE_HEIGHT + 200);
       ctx.restore();
 
