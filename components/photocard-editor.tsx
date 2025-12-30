@@ -104,34 +104,65 @@ export function PhotocardEditor() {
       if (!win) return;
 
       win.document.write(`
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>Save Photocard</title>
-          <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        </head>
-        <body style="
-          margin:0;
-          background:#000;
-          display:flex;
-          flex-direction:column;
-          justify-content:center;
-          align-items:center;
-          height:100vh;
-        ">
-          <img src="${dataUrl}"
-            style="max-width:100%;height:auto;user-select:none;" />
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Save Photocard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  </head>
+  <body style="
+    margin:0;
+    background:#000;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+    padding:16px;
+    box-sizing:border-box;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont;
+  ">
+    <img src="${dataUrl}"
+      style="
+        max-width:100%;
+        height:auto;
+        user-select:none;
+        border-radius:8px;
+      " />
 
-          <p style="
-            color:#fff;
-            margin-top:12px;
-            font-size:14px;
-            text-align:center;
-          ">
-            ছবির উপর লং প্রেস করুন → Save Image
-          </p>
-        </body>
-      </html>
+    <p style="
+      color:#fff;
+      margin-top:16px;
+      font-size:15px;
+      text-align:center;
+      line-height:1.5;
+      opacity:0.9;
+    ">
+      ফেইসবুক অ্যাপের সীমাবদ্ধতার কারণে এখান থেকে ছবি শেয়ার বা ডাউনলোড করা যাচ্ছে না।<br/>
+      সম্পূর্ণ সুবিধা পেতে অনুগ্রহ করে <b>Chrome বা অন্য কোনো ব্রাউজারে</b> পেজটি খুলুন।
+    </p>
+
+    <button
+      onclick="
+        const url = location.href.replace(/^https?:\\/\\//,'');
+        location.href = 'intent://' + url + '#Intent;scheme=https;package=com.android.chrome;end';
+      "
+      style="
+        margin-top:14px;
+        padding:12px 18px;
+        font-size:15px;
+        background:#1a73e8;
+        color:#fff;
+        border:none;
+        border-radius:6px;
+        cursor:pointer;
+      "
+    >
+      Browser দিয়ে শেয়ার করুন
+    </button>
+
+  </body>
+</html>
     `);
 
       win.document.close();
@@ -139,6 +170,7 @@ export function PhotocardEditor() {
 
     reader.readAsDataURL(blob);
   };
+
 
   const isFacebookInAppBrowser = () => {
     const ua = navigator.userAgent || '';
@@ -194,7 +226,7 @@ export function PhotocardEditor() {
     if (!blob) return;
 
     if (isAndroidFacebookBrowser()) {
-      openInChromeAndroid();
+      openImageForManualSave(blob);
       return;
     }
 
@@ -252,6 +284,13 @@ export function PhotocardEditor() {
       type: 'image/png',
     });
 
+    // Facebook in-app browser fallback
+    // 🚨 Android Facebook Browser
+    if (isAndroidFacebookBrowser()) {
+      openImageForManualSave(blob);
+      return;
+    }
+
     // Native share (Chrome, Safari, etc.)
     if (navigator.share && navigator.canShare?.({ files: [file] })) {
       try {
@@ -267,12 +306,7 @@ export function PhotocardEditor() {
       }
     }
 
-    // Facebook in-app browser fallback
-    // 🚨 Android Facebook Browser
-    if (isAndroidFacebookBrowser()) {
-      openInChromeAndroid();
-      return;
-    }
+
 
 
     // Last fallback (custom share menu)
