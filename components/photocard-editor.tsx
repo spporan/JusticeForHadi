@@ -95,15 +95,15 @@ export function PhotocardEditor() {
   };
 
   const openImageForManualSave = (blob: Blob) => {
-  const reader = new FileReader();
+    const reader = new FileReader();
 
-  reader.onloadend = () => {
-    const dataUrl = reader.result as string;
+    reader.onloadend = () => {
+      const dataUrl = reader.result as string;
 
-    const win = window.open('', '_blank');
-    if (!win) return;
+      const win = window.open('', '_blank');
+      if (!win) return;
 
-    win.document.write(`
+      win.document.write(`
       <!DOCTYPE html>
       <html>
         <head>
@@ -134,17 +134,31 @@ export function PhotocardEditor() {
       </html>
     `);
 
-    win.document.close();
+      win.document.close();
+    };
+
+    reader.readAsDataURL(blob);
   };
 
-  reader.readAsDataURL(blob);
-};
+  const isFacebookInAppBrowser = () => {
+    const ua = navigator.userAgent || '';
+    return /FBAN|FBAV|Instagram/i.test(ua);
+  };
 
-const isFacebookInAppBrowser = () => {
-  const ua = navigator.userAgent || '';
-  return /FBAN|FBAV|Instagram/i.test(ua);
-};
+  const isAndroidFacebookBrowser = () => {
+    const ua = navigator.userAgent;
+    return /FBAN|FBAV|Instagram/.test(ua) && /Android/.test(ua);
+  };
 
+  const openInChromeAndroid = () => {
+    const url = window.location.href.replace(/^https?:\/\//, '');
+
+    const intentUrl =
+      `intent://${url}` +
+      `#Intent;scheme=https;package=com.android.chrome;end`;
+
+    window.location.href = intentUrl;
+  };
 
 
   // const handleExport = async () => {
@@ -171,29 +185,29 @@ const isFacebookInAppBrowser = () => {
   // };
 
   const handleExport = async () => {
-  const blob = await exportCanvas(
-    selectedImage,
-    textLayers,
-    startDate,
-    timeHeader
-  );
-  if (!blob) return;
+    const blob = await exportCanvas(
+      selectedImage,
+      textLayers,
+      startDate,
+      timeHeader
+    );
+    if (!blob) return;
 
-  if (isFacebookInAppBrowser()) {
-    openImageForManualSave(blob);
-    return;
-  }
+    if (isAndroidFacebookBrowser()) {
+      openInChromeAndroid();
+      return;
+    }
 
-  // Normal browsers
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `justice-for-hadi-photocard-${Date.now()}.png`;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
-};
+    // Normal browsers
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `justice-for-hadi-photocard-${Date.now()}.png`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  };
 
   // const handleShare = async () => {
   //   const blob = await exportCanvas(selectedImage, textLayers, startDate, timeHeader);
@@ -226,42 +240,44 @@ const isFacebookInAppBrowser = () => {
   // };
 
   const handleShare = async () => {
-  const blob = await exportCanvas(
-    selectedImage,
-    textLayers,
-    startDate,
-    timeHeader
-  );
-  if (!blob) return;
+    const blob = await exportCanvas(
+      selectedImage,
+      textLayers,
+      startDate,
+      timeHeader
+    );
+    if (!blob) return;
 
-  const file = new File([blob], 'justice-for-hadi-photocard.png', {
-    type: 'image/png',
-  });
+    const file = new File([blob], 'justice-for-hadi-photocard.png', {
+      type: 'image/png',
+    });
 
-  // Native share (Chrome, Safari, etc.)
-  if (navigator.share && navigator.canShare?.({ files: [file] })) {
-    try {
-      await navigator.share({
-        files: [file],
-        title: 'Justice For Hadi Photocard',
-        text: timeHeader,
-      });
-      setShowShareMenu(false);
-      return;
-    } catch {
-      // fall through
+    // Native share (Chrome, Safari, etc.)
+    if (navigator.share && navigator.canShare?.({ files: [file] })) {
+      try {
+        await navigator.share({
+          files: [file],
+          title: 'Justice For Hadi Photocard',
+          text: timeHeader,
+        });
+        setShowShareMenu(false);
+        return;
+      } catch {
+        // fall through
+      }
     }
-  }
 
-  // Facebook in-app browser fallback
-  if (isFacebookInAppBrowser()) {
-    openImageForManualSave(blob);
-    return;
-  }
+    // Facebook in-app browser fallback
+    // 🚨 Android Facebook Browser
+    if (isAndroidFacebookBrowser()) {
+      openInChromeAndroid();
+      return;
+    }
 
-  // Last fallback (custom share menu)
-  setShowShareMenu(true);
-};
+
+    // Last fallback (custom share menu)
+    setShowShareMenu(true);
+  };
 
   const handleFacebookShare = async () => {
     const blob = await exportCanvas(selectedImage, textLayers, startDate, timeHeader);
