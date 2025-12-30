@@ -4,6 +4,7 @@ import { Analytics } from '@vercel/analytics/next';
 import { FontLoader } from '@/components/font-loader';
 import { ThemeProvider } from '@/components/theme-provider';
 import './globals.css';
+import { getAssetPath } from '@/lib/utils';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -14,7 +15,7 @@ export const metadata: Metadata = {
   keywords: ['photocard', 'quote maker', 'image editor', 'social media', 'quotes', 'design tool'],
   authors: [{ name: 'Shah Poran' }],
   icons: {
-    icon: '/icon-32x32.png',
+    icon: getAssetPath('/icon-32x32.png'),
   },
   openGraph: {
     title: 'Justice For Hadi',

@@ -1,6 +1,6 @@
-# 🎨 Photocard Generator
+# Justice For Hadi
 
-A fully client-side web app for creating beautiful quote photocards. Built with Next.js, optimized for GitHub Pages.
+Create and share powerful photocards to keep Hadi’s call for justice alive.
 
 ## ✨ Features
 
@@ -33,7 +33,7 @@ Visit `http://localhost:3000`
 npm run build
 ```
 
-This generates a static export in the `out` directory.
+This generates a static export in the `docs` directory.
 
 ### Deploy to GitHub Pages
 
@@ -140,6 +140,3 @@ MIT License - feel free to use for any project!
 
 Contributions welcome! Feel free to open issues or PRs.
 
----
-
-Built with ❤️ using v0.dev
