@@ -26,7 +26,7 @@ export function PhotocardCanvas({
 }: PhotocardCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [scale, setScale] = useState(1);
+  const [scale, setScale] = useState(0);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [dragging, setDragging] = useState<{ id: string; startX: number; startY: number } | null>(
     null
@@ -202,7 +202,7 @@ export function PhotocardCanvas({
   return (
     <div ref={containerRef} className="relative w-full flex items-center justify-center">
       <div
-        className="relative bg-white shadow-2xl rounded-lg overflow-hidden"
+        className="relative bg-white shadow-2xl rounded-lg overflow-hidden max-w-full"
         style={{
           width: CANVAS_SIZE * scale,
           height: CANVAS_SIZE * scale,

@@ -238,7 +238,7 @@ export function PhotocardEditor() {
     <div className="flex flex-col lg:flex-row h-[100dvh] w-full max-w-[100vw] overflow-hidden">
       {/* Canvas Area */}
       <div className="flex-1 flex items-center justify-center bg-muted/30 p-4 lg:p-8 pb-32 lg:pb-8 w-full overflow-hidden">
-        <div className="relative">
+        <div className="relative w-full flex justify-center min-w-0">
           <PhotocardCanvas
             image={selectedImage}
             textLayers={textLayers}
@@ -280,7 +280,7 @@ export function PhotocardEditor() {
       <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-background border-t shadow-lg z-40 px-4 pb-safe">
         <div className="py-4 space-y-3">
           {/* Primary Actions */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 min-[400px]:grid-cols-2 gap-3">
             <Button onClick={handleExport} size="lg" className="w-full">
               <Download className="w-4 h-4 mr-2" />
               Download
@@ -460,7 +460,7 @@ function ControlPanel({
   setShowShareMenu,
 }: ControlPanelProps) {
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 lg:p-6 space-y-6">
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold" style={{ textAlign: 'center' }}>Justice for <span style={{ color: '#ff0000' }}>Shahid Hadi</span></h1>
