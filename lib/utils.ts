@@ -19,6 +19,6 @@ export function calculateElapsedTime(startDate: Date): TimeElapsed {
   console.log("diffMs ", diffMs);
   console.log("startDate ", startDate);
   console.log("now ", now);
-  
+
   return { days, hours, minutes };
 }

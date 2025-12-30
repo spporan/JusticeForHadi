@@ -395,7 +395,7 @@ function ControlPanel({
       <div>
         <h1 className="text-2xl font-bold" style={{ textAlign: 'center' }}>Justice for <span style={{ color: '#ff0000' }}>Shahid Hadi</span></h1>
         <p className="text-sm text-muted-foreground" style={{ textAlign: 'center' }}>Stand for Justice
-Time Is Passing. Justice Is Due</p>
+          Time Is Passing. Justice Is Due</p>
       </div>
 
       {/* Action Buttons (Desktop) */}
@@ -494,9 +494,8 @@ Time Is Passing. Justice Is Due</p>
                 <button
                   key={preset.id}
                   onClick={() => setSelectedImage(preset.url)}
-                  className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all hover:scale-105 ${
-                    selectedImage === preset.url ? 'border-primary' : 'border-border'
-                  }`}
+                  className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all hover:scale-105 ${selectedImage === preset.url ? 'border-primary' : 'border-border'
+                    }`}
                 >
                   <img
                     src={preset.url || '/placeholder.svg'}
