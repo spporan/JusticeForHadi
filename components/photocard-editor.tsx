@@ -16,6 +16,13 @@ import {
 } from '@/components/ui/select';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog';
+import {
   Download,
   Share2,
   ImageIcon,
@@ -54,6 +61,8 @@ export function PhotocardEditor() {
     'শহীদ ওসমান হাদি হত্যার বিচারহীনতার সময়কাল'
   );
   const [showShareMenu, setShowShareMenu] = useState(false);
+  const [saveDialogOpen, setSaveDialogOpen] = useState(false);
+  const [generatedImageBlob, setGeneratedImageBlob] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const selectedLayer = textLayers.find(layer => layer.id === selectedLayerId);
@@ -83,12 +92,22 @@ export function PhotocardEditor() {
     const blob = await exportCanvas(selectedImage, textLayers, startDate, timeHeader);
     if (!blob) return;
 
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `justice-for-hadi-photocard-${Date.now()}.png`;
-    a.click();
-    URL.revokeObjectURL(url);
+    // On mobile/touch devices, or as a fallback, show the dialog
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || navigator.maxTouchPoints > 0;
+
+    if (isMobile) {
+      const url = URL.createObjectURL(blob);
+      setGeneratedImageBlob(url);
+      setSaveDialogOpen(true);
+    } else {
+      // Desktop: Direct download
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `justice-for-hadi-photocard-${Date.now()}.png`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
   };
 
   const handleShare = async () => {
@@ -109,7 +128,10 @@ export function PhotocardEditor() {
         console.log('Share cancelled');
       }
     } else {
-      setShowShareMenu(true);
+      // Fallback for when native share isn't available (like Facebook in-app browser)
+      const url = URL.createObjectURL(blob);
+      setGeneratedImageBlob(url);
+      setSaveDialogOpen(true);
     }
   };
 
@@ -201,9 +223,9 @@ export function PhotocardEditor() {
   };
 
   return (
-    <div className="flex flex-col lg:flex-row h-screen">
+    <div className="flex flex-col lg:flex-row h-[100dvh] w-full max-w-[100vw] overflow-hidden">
       {/* Canvas Area */}
-      <div className="flex-1 flex items-center justify-center bg-muted/30 p-4 lg:p-8 pb-32 lg:pb-8">
+      <div className="flex-1 flex items-center justify-center bg-muted/30 p-4 lg:p-8 pb-32 lg:pb-8 w-full overflow-hidden">
         <div className="relative">
           <PhotocardCanvas
             image={selectedImage}
@@ -243,8 +265,8 @@ export function PhotocardEditor() {
       </div>
 
       {/* Mobile Action Buttons - Fixed at bottom */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-background border-t shadow-lg z-40">
-        <div className="p-4 space-y-3">
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-background border-t shadow-lg z-40 px-4 pb-safe">
+        <div className="py-4 space-y-3">
           {/* Primary Actions */}
           <div className="grid grid-cols-2 gap-3">
             <Button onClick={handleExport} size="lg" className="w-full">
@@ -343,6 +365,40 @@ export function PhotocardEditor() {
           </Sheet>
         </div>
       </div>
+
+      {/* Save/Share Dialog */}
+      <Dialog open={saveDialogOpen} onOpenChange={setSaveDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Save Your Photocard</DialogTitle>
+            <DialogDescription>
+              Long press the image below to save it to your device.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex items-center justify-center p-4 bg-muted/20 rounded-lg">
+            {generatedImageBlob && (
+              <img
+                src={generatedImageBlob}
+                alt="Generated Photocard"
+                className="max-w-full max-h-[60vh] object-contain rounded-md shadow-sm"
+              />
+            )}
+          </div>
+          <div className="flex flex-col gap-2">
+            <p className="text-xs text-center text-muted-foreground">
+              After saving, you can share it on your favorite platform.
+            </p>
+            <div className="grid grid-cols-2 gap-2">
+              <Button onClick={() => window.open('https://www.facebook.com/', '_blank')} variant="outline" size="sm">
+                <Facebook className="w-4 h-4 mr-2" /> Facebook
+              </Button>
+              <Button onClick={() => window.open('https://twitter.com/intent/tweet', '_blank')} variant="outline" size="sm">
+                <Twitter className="w-4 h-4 mr-2" /> Twitter
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

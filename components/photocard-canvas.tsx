@@ -49,7 +49,8 @@ export function PhotocardCanvas({
     const updateScale = () => {
       if (containerRef.current) {
         const containerWidth = containerRef.current.clientWidth;
-        const maxSize = Math.min(containerWidth - 32, 600);
+        // Increase padding subtraction from 32 to 48 for better mobile safety margin
+        const maxSize = Math.min(containerWidth - 48, 600);
         setScale(maxSize / CANVAS_SIZE);
       }
     };
