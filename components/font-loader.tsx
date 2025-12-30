@@ -3,8 +3,8 @@
 import { getAssetPath } from '@/lib/utils';
 
 export function FontLoader() {
-    return (
-        <style jsx global>{`
+  return (
+    <style jsx global>{`
       @font-face {
         font-family: 'Osman Hadi Sotota';
         src: url('${getAssetPath('/fonts/Osman Hadi Sotota.ttf')}') format('truetype');
@@ -20,6 +20,15 @@ export function FontLoader() {
         font-style: normal;
         font-display: swap;
       }
+
+      @font-face {
+        font-family: 'Hadi';
+        src: url('${getAssetPath('/fonts/Hadi.ttf')}') format('truetype');
+        font-weight: normal;
+        font-style: normal;
+        font-display: swap;
+      }
+
     `}</style>
-    );
+  );
 }

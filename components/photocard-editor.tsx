@@ -86,7 +86,7 @@ export function PhotocardEditor() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `photocard-${Date.now()}.png`;
+    a.download = `justice-for-hadi-photocard-${Date.now()}.png`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -95,13 +95,13 @@ export function PhotocardEditor() {
     const blob = await exportCanvas(selectedImage, textLayers, startDate, timeHeader);
     if (!blob) return;
 
-    const file = new File([blob], 'memorial-photocard.png', { type: 'image/png' });
+    const file = new File([blob], 'justice-for-hadi-photocard.png', { type: 'image/png' });
 
     if (navigator.share && navigator.canShare({ files: [file] })) {
       try {
         await navigator.share({
           files: [file],
-          title: 'Memorial Photocard',
+          title: 'Justice For Hadi Photocard',
           text: timeHeader,
         });
         setShowShareMenu(false);
@@ -121,7 +121,7 @@ export function PhotocardEditor() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = 'memorial-photocard.png';
+    link.download = 'justice-for-hadi-photocard.png';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -144,14 +144,14 @@ export function PhotocardEditor() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = 'memorial-photocard.png';
+    link.download = 'justice-for-hadi-photocard.png';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
 
     // Open Twitter with a slight delay
-    const text = encodeURIComponent(`${timeHeader}\n\n#Memorial #Justice`);
+    const text = encodeURIComponent(`${timeHeader}\n\n#JusticeForHadi`);
     setTimeout(() => {
       window.open(`https://twitter.com/intent/tweet?text=${text}`, '_blank');
       alert('Image downloaded! Please upload it to Twitter/X from your downloads folder.');
@@ -164,14 +164,14 @@ export function PhotocardEditor() {
     const blob = await exportCanvas(selectedImage, textLayers, startDate, timeHeader);
     if (!blob) return;
 
-    const file = new File([blob], 'memorial-photocard.png', { type: 'image/png' });
+    const file = new File([blob], 'justice-for-hadi-photocard.png', { type: 'image/png' });
 
     // Try native share first (works on mobile)
     if (navigator.share && navigator.canShare({ files: [file] })) {
       try {
         await navigator.share({
           files: [file],
-          title: 'Memorial Photocard',
+          title: 'Justice For Hadi Photocard',
           text: timeHeader,
         });
         setShowShareMenu(false);
@@ -185,7 +185,7 @@ export function PhotocardEditor() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = 'memorial-photocard.png';
+    link.download = 'justice-for-hadi-photocard.png';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

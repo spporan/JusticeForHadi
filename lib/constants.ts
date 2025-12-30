@@ -159,6 +159,7 @@ export const PRESET_QUOTES: PresetQuote[] = [
 
 
 export const FONT_FAMILIES = [
+  'Hadi',
   'Inter',
   'Geist',
   'Geist Mono',

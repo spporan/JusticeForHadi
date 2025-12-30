@@ -96,7 +96,7 @@ export function PhotocardCanvas({
       ctx.fillRect(0, IMAGE_HEIGHT, CANVAS_SIZE, TIME_HEIGHT);
 
       ctx.save();
-     ctx.font = '600 38px "Sahid Osman Hadi"';
+      ctx.font = '600 38px "Hadi"';
       ctx.fillStyle = '#000000';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
@@ -104,20 +104,20 @@ export function PhotocardCanvas({
       ctx.restore();
 
       ctx.save();
-     ctx.font = 'bold 80px "Sohid Osman Hadi"';
+      ctx.font = 'bold 80px "Hadi"';
       ctx.fillStyle = '#ff0000';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
 
       const timeText = `${toBanglaDigit(elapsedTime.days)} দিন ` +
-  `${toBanglaDigit(elapsedTime.hours).toString().padStart(2, '0')} ঘণ্টা ` +
-  `${toBanglaDigit(elapsedTime.minutes).toString().padStart(2, '0')} মিনিট`;
+        `${toBanglaDigit(elapsedTime.hours).toString().padStart(2, '0')} ঘণ্টা ` +
+        `${toBanglaDigit(elapsedTime.minutes).toString().padStart(2, '0')} মিনিট`;
 
       ctx.fillText(timeText, CANVAS_SIZE / 2, IMAGE_HEIGHT + 200);
-      
+
       // Add #JusticeForHadi text
       ctx.save();
-      ctx.font = 'bold 60px "Sohid Osman Hadi"';
+      ctx.font = 'bold 60px "Hadi"';
       ctx.fillStyle = '#ff0000'; // Red color for visibility
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
@@ -211,9 +211,8 @@ export function PhotocardCanvas({
               key={layer.id}
               onMouseDown={e => handleMouseDown(e, layer.id)}
               onTouchStart={e => handleTouchStart(e, layer.id)}
-              className={`absolute cursor-move select-none transition-all ${
-                selectedLayerId === layer.id ? 'ring-2 ring-primary ring-offset-2' : ''
-              } ${dragging?.id === layer.id ? 'opacity-70' : ''}`}
+              className={`absolute cursor-move select-none transition-all ${selectedLayerId === layer.id ? 'ring-2 ring-primary ring-offset-2' : ''
+                } ${dragging?.id === layer.id ? 'opacity-70' : ''}`}
               style={{
                 left: layer.x * scale,
                 top: layer.y * scale,
@@ -243,7 +242,7 @@ export function PhotocardCanvas({
 
 
 export function toBanglaDigit(number: number) {
-  const banglaDigits = ['০','১','২','৩','৪','৫','৬','৭','৮','৯'];
+  const banglaDigits = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
   return String(number)
     .split('')
     .map(d => (d >= '0' && d <= '9' ? banglaDigits[Number(d)] : d))
@@ -329,7 +328,7 @@ export function exportCanvas(
       ctx.fillRect(0, IMAGE_HEIGHT, CANVAS_SIZE, TIME_HEIGHT);
 
       ctx.save();
-      ctx.font = '600 38px "Sohid Osman Hadi"';
+      ctx.font = '600 38px "Hadi"';
       ctx.fillStyle = '#000000';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
@@ -339,20 +338,20 @@ export function exportCanvas(
       // Draw elapsed time
       const elapsed = calculateElapsedTime(startDate);
       ctx.save();
-      ctx.font = 'bold 80px "Sohid Osman Hadi"';
+      ctx.font = 'bold 80px "Hadi"';
       ctx.fillStyle = '#ff0000';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
 
       const timeText = `${toBanglaDigit(elapsed.days)} দিন ` +
-  `${toBanglaDigit(elapsed.hours).toString().padStart(2, '0')} ঘণ্টা ` +
-  `${toBanglaDigit(elapsed.minutes).toString().padStart(2, '0')} মিনিট`;
+        `${toBanglaDigit(elapsed.hours).toString().padStart(2, '0')} ঘণ্টা ` +
+        `${toBanglaDigit(elapsed.minutes).toString().padStart(2, '0')} মিনিট`;
       ctx.fillText(timeText, CANVAS_SIZE / 2, IMAGE_HEIGHT + 200);
       ctx.restore();
 
       // Add #JusticeForHadi text
       ctx.save();
-      ctx.font = 'bold 60px "Sohid Osman Hadi"';
+      ctx.font = 'bold 60px "Hadi"';
       ctx.fillStyle = '#ff0000'; // Red color for visibility
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';

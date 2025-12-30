@@ -20,7 +20,7 @@ module.exports = {
     }),
     extend: {
       fontFamily: {
-        'osman-hadi': ['Sohid Osman Hadi', 'Osman Hadi Sotota', 'sans-serif'],
+        'osman-hadi': ['Hadi', 'Sohid Osman Hadi', 'Osman Hadi Sotota', 'sans-serif'],
       },
       colors: {
         border: 'var(--border)',
