@@ -21,6 +21,14 @@ export const metadata: Metadata = {
     title: 'Justice For Hadi',
     description: 'Create and share powerful photocards to keep Hadi’s call for justice alive.',
     type: 'website',
+    images: [
+      {
+        url: getAssetPath('/icon.png'),
+        width: 1200,
+        height: 630,
+        alt: 'Justice For Hadi Preview',
+      },
+    ],
   },
 };
 

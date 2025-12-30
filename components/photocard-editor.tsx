@@ -171,10 +171,38 @@ export function PhotocardEditor() {
     reader.readAsDataURL(blob);
   };
 
+  const openImageForManualSaveForFBIOS = (blob: Blob): void => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const dataUrl = reader.result as string;
+      const win = window.open('', '_blank');
+      if (!win) return;
 
-  const isFacebookInAppBrowser = () => {
+      win.document.write(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>Save Photocard</title>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+          </head>
+          <body style="margin:0; background:#000; display:flex; flex-direction:column; justify-content:center; align-items:center; height:100vh;">
+            <img src="${dataUrl}" style="max-width:100%;height:auto;user-select:none;" />
+            <p style="color:#fff; margin-top:12px; font-size:14px; text-align:center;">
+              ছবির উপর লং প্রেস করুন → Save to Photos
+            </p>
+          </body>
+        </html>
+      `);
+      win.document.close();
+    };
+    reader.readAsDataURL(blob);
+  };
+
+
+
+  const isFacebookInAppIOSBrowser = () => {
     const ua = navigator.userAgent || '';
-    return /FBAN|FBAV|Instagram/i.test(ua);
+    return /FBAN|FBAV|Instagram/i.test(ua) && /iPhone|iPad|iPod/.test(ua);;
   };
 
   const isAndroidFacebookBrowser = () => {
@@ -182,15 +210,6 @@ export function PhotocardEditor() {
     return /FBAN|FBAV|Instagram/.test(ua) && /Android/.test(ua);
   };
 
-  const openInChromeAndroid = () => {
-    const url = window.location.href.replace(/^https?:\/\//, '');
-
-    const intentUrl =
-      `intent://${url}` +
-      `#Intent;scheme=https;package=com.android.chrome;end`;
-
-    window.location.href = intentUrl;
-  };
 
 
   // const handleExport = async () => {
@@ -227,6 +246,11 @@ export function PhotocardEditor() {
 
     if (isAndroidFacebookBrowser()) {
       openImageForManualSave(blob);
+      return;
+    }
+
+    if (isFacebookInAppIOSBrowser()) {
+      openImageForManualSaveForFBIOS(blob);
       return;
     }
 
