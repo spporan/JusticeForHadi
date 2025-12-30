@@ -46,18 +46,27 @@ export function PhotocardCanvas({
   }, [startDate]);
 
   useEffect(() => {
+    if (!containerRef.current) return;
+
     const updateScale = () => {
       if (containerRef.current) {
         const containerWidth = containerRef.current.clientWidth;
-        // Increase padding subtraction from 32 to 48 for better mobile safety margin
-        const maxSize = Math.min(containerWidth - 48, 600);
+        // Use full container width (parent already has padding)
+        const maxSize = Math.min(containerWidth, 600);
         setScale(maxSize / CANVAS_SIZE);
       }
     };
 
+    // Initial scale update
     updateScale();
-    window.addEventListener('resize', updateScale);
-    return () => window.removeEventListener('resize', updateScale);
+
+    const resizeObserver = new ResizeObserver(() => {
+      updateScale();
+    });
+
+    resizeObserver.observe(containerRef.current);
+
+    return () => resizeObserver.disconnect();
   }, []);
 
   useEffect(() => {
@@ -97,7 +106,7 @@ export function PhotocardCanvas({
       ctx.fillRect(0, IMAGE_HEIGHT, CANVAS_SIZE, TIME_HEIGHT);
 
       ctx.save();
-      ctx.font = '600 38px "Hadi"';
+      ctx.font = '600 38px sans-serif';
       ctx.fillStyle = '#000000';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
@@ -105,7 +114,7 @@ export function PhotocardCanvas({
       ctx.restore();
 
       ctx.save();
-      ctx.font = 'bold 80px "Hadi"';
+      ctx.font = 'bold 80px sans-serif';
       ctx.fillStyle = '#ff0000';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
@@ -118,7 +127,7 @@ export function PhotocardCanvas({
 
       // Add #JusticeForHadi text
       ctx.save();
-      ctx.font = 'bold 60px "Hadi"';
+      ctx.font = 'bold 60px sans-serif';
       ctx.fillStyle = '#ff0000'; // Red color for visibility
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
@@ -329,7 +338,7 @@ export function exportCanvas(
       ctx.fillRect(0, IMAGE_HEIGHT, CANVAS_SIZE, TIME_HEIGHT);
 
       ctx.save();
-      ctx.font = '600 38px "Hadi"';
+      ctx.font = '600 38px sans-serif';
       ctx.fillStyle = '#000000';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
@@ -339,7 +348,7 @@ export function exportCanvas(
       // Draw elapsed time
       const elapsed = calculateElapsedTime(startDate);
       ctx.save();
-      ctx.font = 'bold 80px "Hadi"';
+      ctx.font = 'bold 80px sans-serif';
       ctx.fillStyle = '#ff0000';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
@@ -352,7 +361,7 @@ export function exportCanvas(
 
       // Add #JusticeForHadi text
       ctx.save();
-      ctx.font = 'bold 60px "Hadi"';
+      ctx.font = 'bold 60px sans-serif';
       ctx.fillStyle = '#ff0000'; // Red color for visibility
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';

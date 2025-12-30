@@ -39,6 +39,12 @@ import { PRESET_IMAGES, PRESET_QUOTES, FONT_FAMILIES } from '@/lib/constants';
 import { getAssetPath } from '@/lib/utils';
 import type { TextLayer } from '@/lib/types';
 
+const isFacebookBrowser = () => {
+  if (typeof window === 'undefined') return false;
+  const ua = navigator.userAgent || navigator.vendor || (window as any).opera;
+  return ua.indexOf('FBAN') > -1 || ua.indexOf('FBAV') > -1;
+};
+
 export function PhotocardEditor() {
   const [selectedImage, setSelectedImage] = useState<string>(PRESET_IMAGES[0].url);
   const [textLayers, setTextLayers] = useState<TextLayer[]>([
@@ -92,15 +98,16 @@ export function PhotocardEditor() {
     const blob = await exportCanvas(selectedImage, textLayers, startDate, timeHeader);
     if (!blob) return;
 
-    // On mobile/touch devices, or as a fallback, show the dialog
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || navigator.maxTouchPoints > 0;
-
-    if (isMobile) {
-      const url = URL.createObjectURL(blob);
-      setGeneratedImageBlob(url);
-      setSaveDialogOpen(true);
+    if (isFacebookBrowser()) {
+      // Convert blob to base64 data URL for better compatibility with Facebook's in-app browser
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setGeneratedImageBlob(reader.result as string);
+        setSaveDialogOpen(true);
+      };
+      reader.readAsDataURL(blob);
     } else {
-      // Desktop: Direct download
+      // Normal browser: Direct download
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -127,11 +134,16 @@ export function PhotocardEditor() {
       } catch (err) {
         console.log('Share cancelled');
       }
+    } else if (isFacebookBrowser()) {
+      // Fallback for Facebook in-app browser
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setGeneratedImageBlob(reader.result as string);
+        setSaveDialogOpen(true);
+      };
+      reader.readAsDataURL(blob);
     } else {
-      // Fallback for when native share isn't available (like Facebook in-app browser)
-      const url = URL.createObjectURL(blob);
-      setGeneratedImageBlob(url);
-      setSaveDialogOpen(true);
+      setShowShareMenu(true);
     }
   };
 
@@ -366,13 +378,13 @@ export function PhotocardEditor() {
         </div>
       </div>
 
-      {/* Save/Share Dialog */}
+      {/* Save/Share Dialog for Facebook In-App Browser */}
       <Dialog open={saveDialogOpen} onOpenChange={setSaveDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Save Your Photocard</DialogTitle>
             <DialogDescription>
-              Long press the image below to save it to your device.
+              Long press the image below and select <strong>"Save Image"</strong> or <strong>"Download Image"</strong>.
             </DialogDescription>
           </DialogHeader>
           <div className="flex items-center justify-center p-4 bg-muted/20 rounded-lg">
@@ -380,13 +392,14 @@ export function PhotocardEditor() {
               <img
                 src={generatedImageBlob}
                 alt="Generated Photocard"
-                className="max-w-full max-h-[60vh] object-contain rounded-md shadow-sm"
+                className="max-w-full max-h-[60vh] object-contain rounded-md shadow-sm pointer-events-auto select-none touch-auto"
+                style={{ WebkitTouchCallout: 'default' } as any}
               />
             )}
           </div>
           <div className="flex flex-col gap-2">
             <p className="text-xs text-center text-muted-foreground">
-              After saving, you can share it on your favorite platform.
+              After saving, you can upload it to your profile.
             </p>
             <div className="grid grid-cols-2 gap-2">
               <Button onClick={() => window.open('https://www.facebook.com/', '_blank')} variant="outline" size="sm">
