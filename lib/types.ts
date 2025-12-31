@@ -9,6 +9,7 @@ export interface TextLayer {
   opacity: number;
   textShadow: number;
   textAlign: 'left' | 'center' | 'right';
+  isFooter?: boolean;
 }
 
 export interface PresetImage {

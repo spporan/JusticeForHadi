@@ -35,9 +35,42 @@ export function PhotocardCanvas({
   const [elapsedTime, setElapsedTime] = useState(calculateElapsedTime(startDate));
   const [fontsLoaded, setFontsLoaded] = useState(false);
 
-  const CANVAS_SIZE = 1080;
-  const IMAGE_HEIGHT = 720; // Top 2/3 for image
-  const TIME_HEIGHT = 360; // Bottom 1/3 for elapsed time
+  const CANVAS_WIDTH = 1080;
+  const IMAGE_HEIGHT = 720;
+  const BASE_FOOTER_HEIGHT = 360;
+
+  const footerLayer = textLayers.find(l => l.isFooter);
+  const quoteText = footerLayer?.text || '';
+
+  // Calculate dynamic height based on quote
+  const getQuoteMetrics = (ctx: CanvasRenderingContext2D, text: string) => {
+    if (!text) return { lines: [], height: 0 };
+
+    ctx.save();
+    ctx.font = '600 48px "Lima Bosonto"';
+    const maxWidth = CANVAS_WIDTH * 0.9;
+
+    const words = text.split(' ');
+    let lines = [];
+    let currentLine = words[0];
+
+    for (let i = 1; i < words.length; i++) {
+      const word = words[i];
+      const width = ctx.measureText(currentLine + " " + word).width;
+      if (width < maxWidth) {
+        currentLine += " " + word;
+      } else {
+        lines.push(currentLine);
+        currentLine = word;
+      }
+    }
+    lines.push(currentLine);
+    ctx.restore();
+
+    const lineHeight = 60;
+    const height = lines.length * lineHeight + 40;
+    return { lines, height };
+  };
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -55,7 +88,7 @@ export function PhotocardCanvas({
         const containerWidth = containerRef.current.clientWidth;
         // Use full container width (parent already has padding)
         const maxSize = Math.min(containerWidth, 600);
-        setScale(maxSize / CANVAS_SIZE);
+        setScale(maxSize / CANVAS_WIDTH);
       }
     };
 
@@ -83,23 +116,29 @@ export function PhotocardCanvas({
     const img = new window.Image();
     img.crossOrigin = 'anonymous';
     img.onload = () => {
+      const { lines: quoteLines, height: quoteHeightDisplay } = getQuoteMetrics(ctx, quoteText);
+      const FINAL_HEIGHT = IMAGE_HEIGHT + BASE_FOOTER_HEIGHT + quoteHeightDisplay;
+
+      // Update canvas height to fit new content
+      canvas.height = FINAL_HEIGHT;
+
       // Clear canvas
-      ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+      ctx.clearRect(0, 0, CANVAS_WIDTH, FINAL_HEIGHT);
 
       // Draw image in top 2/3 portion
       const aspectRatio = img.width / img.height;
-      let drawWidth = CANVAS_SIZE;
+      let drawWidth = CANVAS_WIDTH;
       let drawHeight = IMAGE_HEIGHT;
       let offsetX = 0;
       let offsetY = 0;
 
-      const targetAspect = CANVAS_SIZE / IMAGE_HEIGHT;
+      const targetAspect = CANVAS_WIDTH / IMAGE_HEIGHT;
 
       if (aspectRatio > targetAspect) {
         drawWidth = IMAGE_HEIGHT * aspectRatio;
-        offsetX = -(drawWidth - CANVAS_SIZE) / 2;
+        offsetX = -(drawWidth - CANVAS_WIDTH) / 2;
       } else {
-        drawHeight = CANVAS_SIZE / aspectRatio;
+        drawHeight = CANVAS_WIDTH / aspectRatio;
         offsetY = -(drawHeight - IMAGE_HEIGHT) / 2;
       }
 
@@ -107,44 +146,89 @@ export function PhotocardCanvas({
 
       // Draw white background for time section
       ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, IMAGE_HEIGHT, CANVAS_SIZE, TIME_HEIGHT);
+      ctx.fillRect(0, IMAGE_HEIGHT, CANVAS_WIDTH, FINAL_HEIGHT - IMAGE_HEIGHT);
 
+      let currentY = IMAGE_HEIGHT; // Start of footer
+
+      // Draw Quote if exists
+      if (quoteLines.length > 0 && footerLayer) {
+        ctx.save();
+        ctx.font = `700 ${footerLayer.fontSize}px "${footerLayer.fontFamily}"`;
+        ctx.fillStyle = footerLayer.color;
+        ctx.globalAlpha = footerLayer.opacity / 100;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+
+        // Text Shadow for footer quote? Usually not needed on white background but respecting user wish
+        if (footerLayer.textShadow > 0) {
+          ctx.shadowColor = 'rgba(0,0,0,0.5)';
+          ctx.shadowBlur = footerLayer.textShadow * 2;
+          ctx.shadowOffsetX = footerLayer.textShadow;
+          ctx.shadowOffsetY = footerLayer.textShadow;
+        }
+
+        currentY += 80; // Top padding for quote
+        const lineHeight = footerLayer.fontSize * 1.25;
+
+        quoteLines.forEach((line, i) => {
+          // Add opening quote to first line, closing quote to last line
+          let displayLine = line;
+          if (i === 0) {
+            displayLine = `❝${line}`;
+          }
+          if (i === quoteLines.length - 1) {
+            displayLine = displayLine + '❞';
+          }
+          ctx.fillText(displayLine, CANVAS_WIDTH / 2, currentY + (i * lineHeight));
+        });
+
+        currentY += (quoteLines.length * lineHeight) + 20; // Bottom padding for quote
+        ctx.restore();
+      }
+
+      // Draw standard footer elements, offset by quote height
+      // Header
       ctx.save();
-      ctx.font = '600 48px Lima Bosonto';
+      ctx.font = '600 48px "Lima Bosonto"';
       ctx.fillStyle = '#000000';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.letterSpacing = '3px';
-      ctx.fillText(timeHeader, CANVAS_SIZE / 2, IMAGE_HEIGHT + 90);
+      // ctx.letterSpacing = '3px'; // valid in standard canvas? no, specific browsers only
+
+      const headerY = quoteText ? currentY + 40 : IMAGE_HEIGHT + 90;
+      ctx.fillText(timeHeader, CANVAS_WIDTH / 2, headerY);
       ctx.restore();
 
+      // Time
+      const elapsed = calculateElapsedTime(startDate);
       ctx.save();
-      ctx.font = 'bold 80px Lima Bosonto';
+      ctx.font = 'bold 80px "Lima Bosonto"';
       ctx.fillStyle = '#ff0000';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
+      const timeText = `${toBanglaDigit(elapsed.days)} দিন ` +
+        `${toBanglaDigit(elapsed.hours).toString().padStart(2, '০')} ঘণ্টা ` +
+        `${toBanglaDigit(elapsed.minutes).toString().padStart(2, '০')} মিনিট`;
 
-      const timeText = `${toBanglaDigit(elapsedTime.days)} দিন ` +
-        `${toBanglaDigit(elapsedTime.hours).toString().padStart(2, '০')} ঘণ্টা ` +
-        `${toBanglaDigit(elapsedTime.minutes).toString().padStart(2, '০')} মিনিট`;
+      const timeY = quoteText ? headerY + 100 : IMAGE_HEIGHT + 200;
+      ctx.fillText(timeText, CANVAS_WIDTH / 2, timeY);
+      ctx.restore();
 
-
-      ctx.fillText(timeText, CANVAS_SIZE / 2, IMAGE_HEIGHT + 200);
-
-      // Add #JusticeForHadi text
+      // Hashtag
       ctx.save();
-      ctx.font = 'bold 60px Lima Bosonto';
-      ctx.fillStyle = '#ff0000'; // Red color for visibility
+      ctx.font = 'bold 60px "Lima Bosonto"';
+      ctx.fillStyle = '#ff0000';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText('#JusticeForHadi', CANVAS_SIZE / 2, IMAGE_HEIGHT + 300);
+      const hashY = quoteText ? timeY + 100 : IMAGE_HEIGHT + 300;
+      ctx.fillText('#JusticeForHadi', CANVAS_WIDTH / 2, hashY);
       ctx.restore();
 
       setImageLoaded(true);
-      setImageLoaded(true);
+      // Removed duplicate setImageLoaded(true)
     };
     img.src = image;
-  }, [image, elapsedTime, timeHeader, fontsLoaded]);
+  }, [image, elapsedTime, timeHeader, fontsLoaded, quoteText, footerLayer]);
 
   // Initial font loading check
   // Initial font loading check
@@ -227,19 +311,24 @@ export function PhotocardCanvas({
     };
   }, [dragging, scale, onLayerUpdate]);
 
+  // Estimate height for rendering container (actual height set in useEffect)
+  const estimatedQuoteLines = quoteText ? Math.ceil(quoteText.length / 35) : 0;
+  const estimatedQuoteHeight = estimatedQuoteLines > 0 ? (estimatedQuoteLines * 60 + 70) : 0;
+  const TOTAL_HEIGHT = IMAGE_HEIGHT + BASE_FOOTER_HEIGHT + estimatedQuoteHeight;
+
   return (
     <div ref={containerRef} className="relative w-full flex items-center justify-center">
       <div
         className="relative bg-white shadow-2xl rounded-lg overflow-hidden max-w-full"
         style={{
-          width: CANVAS_SIZE * scale,
-          height: CANVAS_SIZE * scale,
+          width: CANVAS_WIDTH * scale,
+          height: TOTAL_HEIGHT * scale,
         }}
       >
         <canvas
           ref={canvasRef}
-          width={CANVAS_SIZE}
-          height={CANVAS_SIZE}
+          width={CANVAS_WIDTH}
+          height={TOTAL_HEIGHT}
           className="absolute inset-0 w-full h-full"
         />
 
@@ -251,38 +340,40 @@ export function PhotocardCanvas({
         )}
 
         {imageLoaded &&
-          textLayers.map(layer => {
-            if (!layer.text) return null;
-            return (
-              <div
-                key={layer.id}
-                onMouseDown={e => handleMouseDown(e, layer.id)}
-                onTouchStart={e => handleTouchStart(e, layer.id)}
-                className={`absolute cursor-move select-none transition-all ${selectedLayerId === layer.id ? 'ring-2 ring-primary ring-offset-2' : ''
-                  } ${dragging?.id === layer.id ? 'opacity-70' : ''}`}
-                style={{
-                  left: layer.x * scale,
-                  top: layer.y * scale,
-                  transform: 'translate(-50%, -50%)',
-                  fontSize: layer.fontSize * scale,
-                  fontFamily: layer.fontFamily,
-                  color: layer.color,
-                  opacity: dragging?.id === layer.id ? 0.7 : layer.opacity / 100,
-                  textAlign: layer.textAlign,
-                  textShadow: `${layer.textShadow * scale}px ${layer.textShadow * scale}px ${layer.textShadow * 2 * scale}px rgba(0,0,0,0.5)`,
-                  fontWeight: 700,
-                  whiteSpace: 'pre-wrap',
-                  maxWidth: '80%',
-                  padding: '8px',
-                  touchAction: 'none',
-                }}
-              >
-                {layer.text}
-              </div>
-            );
-          })}
+          textLayers
+            .filter(layer => !layer.isFooter) // Only show non-footer layers as draggable
+            .map(layer => {
+              if (!layer.text) return null;
+              return (
+                <div
+                  key={layer.id}
+                  onMouseDown={e => handleMouseDown(e, layer.id)}
+                  onTouchStart={e => handleTouchStart(e, layer.id)}
+                  className={`absolute cursor-move select-none transition-all ${selectedLayerId === layer.id ? 'ring-2 ring-primary ring-offset-2' : ''
+                    } ${dragging?.id === layer.id ? 'opacity-70' : ''}`}
+                  style={{
+                    left: layer.x * scale,
+                    top: layer.y * scale,
+                    transform: 'translate(-50%, -50%)',
+                    fontSize: layer.fontSize * scale,
+                    fontFamily: layer.fontFamily,
+                    color: layer.color,
+                    opacity: dragging?.id === layer.id ? 0.7 : layer.opacity / 100,
+                    textAlign: layer.textAlign,
+                    textShadow: `${layer.textShadow * scale}px ${layer.textShadow * scale}px ${layer.textShadow * 2 * scale}px rgba(0,0,0,0.5)`,
+                    fontWeight: 700,
+                    whiteSpace: 'pre-wrap',
+                    maxWidth: '80%',
+                    padding: '8px',
+                    touchAction: 'none',
+                  }}
+                >
+                  {layer.text}
+                </div>
+              );
+            })}
 
-        <canvas id="export-canvas" width={CANVAS_SIZE} height={CANVAS_SIZE} className="hidden" />
+        <canvas id="export-canvas" width={CANVAS_WIDTH} height={TOTAL_HEIGHT} className="hidden" />
       </div>
     </div>
   );
@@ -318,38 +409,78 @@ export function exportCanvas(
       return;
     }
 
-    const CANVAS_SIZE = 1080;
+    const CANVAS_WIDTH = 1080;
     const IMAGE_HEIGHT = 720;
-    const TIME_HEIGHT = 360;
+    const BASE_FOOTER_HEIGHT = 360;
+
+    const footerLayer = textLayers.find(l => l.isFooter);
+    const quoteText = footerLayer?.text || '';
+
+    // Helper calculate
+    const getQuoteMetrics = (text: string) => {
+      if (!text) return { lines: [], height: 0 };
+      ctx.save();
+      if (footerLayer) {
+        ctx.font = `600 ${footerLayer.fontSize}px "${footerLayer.fontFamily}"`;
+      } else {
+        ctx.font = '600 48px "Lima Bosonto"';
+      }
+
+      const maxWidth = CANVAS_WIDTH * 0.9;
+      const words = text.split(' ');
+      let lines = [];
+      let currentLine = words[0];
+      for (let i = 1; i < words.length; i++) {
+        const word = words[i];
+        const width = ctx.measureText(currentLine + " " + word).width;
+        if (width < maxWidth) {
+          currentLine += " " + word;
+        } else {
+          lines.push(currentLine);
+          currentLine = word;
+        }
+      }
+      lines.push(currentLine);
+      ctx.restore();
+
+      const lineHeight = footerLayer ? footerLayer.fontSize * 1.25 : 60;
+      const height = lines.length * lineHeight + 40;
+      return { lines, height };
+    };
 
     const img = new window.Image();
     img.crossOrigin = 'anonymous';
     img.onload = () => {
-      ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+      const { lines: quoteLines, height: quoteHeight } = getQuoteMetrics(quoteText);
+      const FINAL_HEIGHT = IMAGE_HEIGHT + BASE_FOOTER_HEIGHT + quoteHeight;
+
+      canvas.width = CANVAS_WIDTH;
+      canvas.height = FINAL_HEIGHT;
+
+      ctx.clearRect(0, 0, CANVAS_WIDTH, FINAL_HEIGHT);
 
       // Draw image in top 2/3
       const aspectRatio = img.width / img.height;
-      let drawWidth = CANVAS_SIZE;
+      let drawWidth = CANVAS_WIDTH;
       let drawHeight = IMAGE_HEIGHT;
       let offsetX = 0;
       let offsetY = 0;
 
-      const targetAspect = CANVAS_SIZE / IMAGE_HEIGHT;
+      const targetAspect = CANVAS_WIDTH / IMAGE_HEIGHT;
 
       if (aspectRatio > targetAspect) {
         drawWidth = IMAGE_HEIGHT * aspectRatio;
-        offsetX = -(drawWidth - CANVAS_SIZE) / 2;
+        offsetX = -(drawWidth - CANVAS_WIDTH) / 2;
       } else {
-        drawHeight = CANVAS_SIZE / aspectRatio;
+        drawHeight = CANVAS_WIDTH / aspectRatio;
         offsetY = -(drawHeight - IMAGE_HEIGHT) / 2;
       }
 
       ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
 
-      // Draw text layers
-      textLayers.forEach(layer => {
+      // Draw normal text layers (exclude footer layer)
+      textLayers.filter(l => !l.isFooter).forEach(layer => {
         ctx.save();
-        // Quote the font family to handle names with spaces correctly
         ctx.font = `700 ${layer.fontSize}px "${layer.fontFamily}"`;
         ctx.fillStyle = layer.color;
         ctx.globalAlpha = layer.opacity / 100;
@@ -363,23 +494,17 @@ export function exportCanvas(
           ctx.shadowOffsetY = layer.textShadow;
         }
 
-        // Handle multi-line text with automatic wrapping
-        // Reduce width to emulate mobile padding scaling behavior ensuring text wraps correctly
-        const MAX_WIDTH = CANVAS_SIZE * 0.8 - 60;
+        const MAX_WIDTH = CANVAS_WIDTH * 0.8 - 60;
         const originalLines = layer.text.split('\n');
         const lines: string[] = [];
 
         originalLines.forEach(originalLine => {
-          // Split by spaces but preserve them essentially by splitting on words
-          // Using a simple split(' ') approach
           const words = originalLine.split(' ');
           let currentLine = words[0];
 
           for (let i = 1; i < words.length; i++) {
             const word = words[i];
-            // Test width with the next word added (including the space)
             const testLine = currentLine + ' ' + word;
-            // Apply 1.2x safety margin to account for font metrics differences
             const width = ctx.measureText(testLine).width * 1.2;
 
             if (width < MAX_WIDTH) {
@@ -396,15 +521,7 @@ export function exportCanvas(
         const startY = layer.y - ((lines.length - 1) * lineHeight) / 2;
 
         lines.forEach((line, index) => {
-          // Reverting to straightforward translation:
-          // The DOM uses `transform: translate(-50%, -50%)`. This centers the ELEMENT box at (layer.x, layer.y).
-          // Inside the element, `text-align` aligns text.
-          // If `text-align: left`: lines are flush left inside the box.
-
-          // To replicate this:
-          // 1. Calculate the bounding box width (max line width).
           const maxWidth = Math.max(...lines.map(l => ctx.measureText(l).width));
-
           let drawX = layer.x;
 
           if (layer.textAlign === 'left') {
@@ -424,22 +541,59 @@ export function exportCanvas(
         ctx.restore();
       });
 
-      // Draw white background for time section
+      // Draw white background for footer
       ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, IMAGE_HEIGHT, CANVAS_SIZE, TIME_HEIGHT);
+      ctx.fillRect(0, IMAGE_HEIGHT, CANVAS_WIDTH, FINAL_HEIGHT - IMAGE_HEIGHT);
 
+      let currentY = IMAGE_HEIGHT;
+
+      // Draw Quote Logic
+      if (quoteLines.length > 0 && footerLayer) {
+        ctx.save();
+        ctx.font = `700 ${footerLayer.fontSize}px "${footerLayer.fontFamily}"`;
+        ctx.fillStyle = footerLayer.color;
+        ctx.globalAlpha = footerLayer.opacity / 100;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+
+        if (footerLayer.textShadow > 0) {
+          ctx.shadowColor = 'rgba(0,0,0,0.5)';
+          ctx.shadowBlur = footerLayer.textShadow * 2;
+          ctx.shadowOffsetX = footerLayer.textShadow;
+          ctx.shadowOffsetY = footerLayer.textShadow;
+        }
+
+        currentY += 80;
+        const qLineHeight = footerLayer.fontSize * 1.25;
+        quoteLines.forEach((line, i) => {
+          // Add opening quote to first line, closing quote to last line
+          let displayLine = line;
+          if (i === 0) {
+            displayLine = `❝${line}`;
+          }
+          if (i === quoteLines.length - 1) {
+            displayLine = displayLine + '❞';
+          }
+          ctx.fillText(displayLine, CANVAS_WIDTH / 2, currentY + (i * qLineHeight));
+        });
+        currentY += (quoteLines.length * qLineHeight) + 20;
+        ctx.restore();
+      }
+
+      // Draw Standard Footer
       ctx.save();
-      ctx.font = '600 48px Lima Bosonto';
+      ctx.font = '600 48px "Lima Bosonto"';
       ctx.fillStyle = '#000000';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText(timeHeader, CANVAS_SIZE / 2, IMAGE_HEIGHT + 90);
+      const headerY = quoteText ? currentY + 40 : IMAGE_HEIGHT + 90;
+      ctx.fillText(timeHeader, CANVAS_WIDTH / 2, headerY);
       ctx.restore();
 
       // Draw elapsed time
       const elapsed = calculateElapsedTime(startDate);
       ctx.save();
-      ctx.font = 'bold 80px Lima Bosonto';
+      ctx.font = 'bold 80px "Lima Bosonto"';
       ctx.fillStyle = '#ff0000';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
@@ -447,17 +601,19 @@ export function exportCanvas(
       const timeText = `${toBanglaDigit(elapsed.days)} দিন ` +
         `${toBanglaDigit(elapsed.hours).toString().padStart(2, '০')} ঘণ্টা ` +
         `${toBanglaDigit(elapsed.minutes).toString().padStart(2, '০')} মিনিট`;
+      const timeY = quoteText ? headerY + 100 : IMAGE_HEIGHT + 200;
 
-      ctx.fillText(timeText, CANVAS_SIZE / 2, IMAGE_HEIGHT + 200);
+      ctx.fillText(timeText, CANVAS_WIDTH / 2, timeY);
       ctx.restore();
 
       // Add #JusticeForHadi text
       ctx.save();
-      ctx.font = 'bold 60px Lima Bosonto';
+      ctx.font = 'bold 60px "Lima Bosonto"';
       ctx.fillStyle = '#ff0000'; // Red color for visibility
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText('#JusticeForHadi', CANVAS_SIZE / 2, IMAGE_HEIGHT + 300);
+      const hashY = quoteText ? timeY + 100 : IMAGE_HEIGHT + 300;
+      ctx.fillText('#JusticeForHadi', CANVAS_WIDTH / 2, hashY);
       ctx.restore();
 
       canvas.toBlob(blob => resolve(blob), 'image/png', 1.0);

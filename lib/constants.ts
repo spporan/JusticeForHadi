@@ -36,6 +36,11 @@ export const PRESET_IMAGES: PresetImage[] = [
 
 export const PRESET_QUOTES: PresetQuote[] = [
   {
+    id: '0',
+    text: 'আমাদের কেউ গুলি করে মেরে ফেললে, তাকে যেন ধরে বিচার করা হয়',
+    category: 'bangla-revolution',
+  },
+  {
     id: '1',
     text: 'সবাই যখন মৃত্যুটাকে ভীষণ ভয় পায়, আমি তখন হাসতে হাসতে আল্লাহর কাছে ভীষণ সন্তুষ্টি নিয়ে পৌছাতে চাই। যে আমি নূন্যতম একটা জীবন লিড করতে পারলাম। আমি একটা ইনসাফের হাসি নিয়ে আমি আমার আল্লাহর কাছে পৌঁছাতে পেরেছি',
     category: 'bangla-revolution',

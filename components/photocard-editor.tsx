@@ -49,23 +49,25 @@ export function PhotocardEditor() {
   const [selectedImage, setSelectedImage] = useState<string>(PRESET_IMAGES[0].url);
   const [textLayers, setTextLayers] = useState<TextLayer[]>([
     {
-      id: '1',
-      text: '',
+      id: '0',
+      text: 'আমাদের কেউ গুলি করে মেরে ফেললে, তাকে যেন ধরে বিচার করা হয়',
       x: 540,
       y: 200,
-      fontSize: 56,
-      fontFamily: 'Inter',
-      color: '#ffffff',
+      fontSize: 40,
+      fontFamily: 'Sohid Osman Hadi',
+      color: '#8e0101',
       opacity: 100,
-      textShadow: 3,
+      textShadow: 5,
       textAlign: 'center',
+      isFooter: true,
     },
   ]);
-  const [selectedLayerId, setSelectedLayerId] = useState<string>('1');
+  const [selectedLayerId, setSelectedLayerId] = useState<string>('0');
   const [startDate, setStartDate] = useState<Date>(new Date(2025, 11, 12, 14, 0, 0)); // December 12, 2025, 2:00:00 PM
   const [timeHeader, setTimeHeader] = useState<string>(
     'শহীদ ওসমান হাদি হত্যার বিচারহীনতার সময়কাল'
   );
+
   const [showShareMenu, setShowShareMenu] = useState(false);
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
   const [generatedImageBlob, setGeneratedImageBlob] = useState<string | null>(null);
@@ -85,9 +87,12 @@ export function PhotocardEditor() {
   };
 
   const handlePresetQuote = (quote: string) => {
-    if (selectedLayer) {
-      updateLayer(selectedLayerId, { text: quote });
-    }
+    // Set text and enable footer mode
+    updateLayer(selectedLayerId, {
+      text: quote,
+      isFooter: true,
+      textAlign: 'center'
+    });
   };
 
   const updateLayer = (id: string, updates: Partial<TextLayer>) => {
@@ -790,8 +795,22 @@ function ControlPanel({
             <>
               <div>
                 <Label>Custom Quote</Label>
+                <div className="flex items-center space-x-2 mt-1 mb-2">
+                  <input
+                    type="checkbox"
+                    id="isFooter"
+                    checked={selectedLayer.isFooter || false}
+                    onChange={e => updateLayer(selectedLayerId, { isFooter: e.target.checked })}
+                    className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                  />
+                  <Label htmlFor="isFooter" className="text-sm font-normal cursor-pointer select-none">
+                    Display in white footer area
+                  </Label>
+                </div>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Quote will appear on top of the image. Use Shift+Enter for line breaks.
+                  {selectedLayer.isFooter
+                    ? "Text will appear below the image in the white footer area."
+                    : "Quote will appear on top of the image. Use Shift+Enter for line breaks."}
                 </p>
                 <textarea
                   value={selectedLayer.text}
