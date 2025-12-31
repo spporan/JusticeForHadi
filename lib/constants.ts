@@ -160,6 +160,11 @@ export const PRESET_QUOTES: PresetQuote[] = [
 
 export const FONT_FAMILIES = [
   'Hadi',
+  'abu sayed',
+  'Lima Bosonto',
+  'Osman Hadi Sotota',
+  'Sohid Osman Hadi',
+  'Mahin Dui Dashok',
   'Inter',
   'Geist',
   'Geist Mono',

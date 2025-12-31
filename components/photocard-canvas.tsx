@@ -298,6 +298,7 @@ export function toBanglaDigit(number: number) {
 
   return banglaNumber;
 }
+
 export function exportCanvas(
   image: string,
   textLayers: TextLayer[],
@@ -348,10 +349,11 @@ export function exportCanvas(
       // Draw text layers
       textLayers.forEach(layer => {
         ctx.save();
-        ctx.font = `700 ${layer.fontSize}px ${layer.fontFamily}`;
+        // Quote the font family to handle names with spaces correctly
+        ctx.font = `700 ${layer.fontSize}px "${layer.fontFamily}"`;
         ctx.fillStyle = layer.color;
         ctx.globalAlpha = layer.opacity / 100;
-        ctx.textAlign = layer.textAlign;
+        ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
 
         if (layer.textShadow > 0) {
@@ -361,13 +363,62 @@ export function exportCanvas(
           ctx.shadowOffsetY = layer.textShadow;
         }
 
-        // Handle multi-line text
-        const lines = layer.text.split('\n');
+        // Handle multi-line text with automatic wrapping
+        // Reduce width to emulate mobile padding scaling behavior ensuring text wraps correctly
+        const MAX_WIDTH = CANVAS_SIZE * 0.8 - 60;
+        const originalLines = layer.text.split('\n');
+        const lines: string[] = [];
+
+        originalLines.forEach(originalLine => {
+          // Split by spaces but preserve them essentially by splitting on words
+          // Using a simple split(' ') approach
+          const words = originalLine.split(' ');
+          let currentLine = words[0];
+
+          for (let i = 1; i < words.length; i++) {
+            const word = words[i];
+            // Test width with the next word added (including the space)
+            const testLine = currentLine + ' ' + word;
+            // Apply 1.2x safety margin to account for font metrics differences
+            const width = ctx.measureText(testLine).width * 1.2;
+
+            if (width < MAX_WIDTH) {
+              currentLine = testLine;
+            } else {
+              lines.push(currentLine);
+              currentLine = word;
+            }
+          }
+          lines.push(currentLine);
+        });
+
         const lineHeight = layer.fontSize * 1.2;
         const startY = layer.y - ((lines.length - 1) * lineHeight) / 2;
 
         lines.forEach((line, index) => {
-          ctx.fillText(line, layer.x, startY + index * lineHeight);
+          // Reverting to straightforward translation:
+          // The DOM uses `transform: translate(-50%, -50%)`. This centers the ELEMENT box at (layer.x, layer.y).
+          // Inside the element, `text-align` aligns text.
+          // If `text-align: left`: lines are flush left inside the box.
+
+          // To replicate this:
+          // 1. Calculate the bounding box width (max line width).
+          const maxWidth = Math.max(...lines.map(l => ctx.measureText(l).width));
+
+          let drawX = layer.x;
+
+          if (layer.textAlign === 'left') {
+            drawX = layer.x - maxWidth / 2;
+            ctx.textAlign = 'left';
+          } else if (layer.textAlign === 'right') {
+            drawX = layer.x + maxWidth / 2;
+            ctx.textAlign = 'right';
+          } else {
+            drawX = layer.x;
+            ctx.textAlign = 'center';
+          }
+
+          ctx.fillText(line, drawX, startY + index * lineHeight);
         });
 
         ctx.restore();

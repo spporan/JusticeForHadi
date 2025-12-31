@@ -45,6 +45,13 @@ export function FontLoader() {
         font-display: swap;
       }
 
+      @font-face {
+        font-family: 'Mahin Dui Dashok';
+        src: url('${getAssetPath('/fonts/FN Mahin Dui Dashok.ttf')}') format('truetype');
+        font-weight: normal;
+        font-style: normal;
+        font-display: swap;
+      }
     `}</style>
   );
 }
